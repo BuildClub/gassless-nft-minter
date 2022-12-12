@@ -11,22 +11,54 @@ contract TestGasslessNFT is ERC721Burnable, Ownable {
     using Strings for uint256;
 
     Counters.Counter private _tokenIdCounter;
-    mapping(address => uint8) private _userCounts;
+    mapping(address => uint256[]) private _userIds;
+    mapping(uint256 => uint8) private _userIdIndex;
     uint8 public immutable MAX_MINT;
 
     constructor(uint8 maxMint) ERC721("TestGasslessNFT", "TGN") {
         MAX_MINT = maxMint;
     }
 
+    function userList() public view returns (string[] memory) {
+        uint256[] memory userIds = _userIds[_msgSender()];
+        uint8 length = uint8(userIds.length);
+
+        string[] memory images = new string[](length);
+
+        if (length == 0) return images;
+
+        for (uint8 i = 0; i <= length - 1; i++) {
+            images[i] = tokenURI(userIds[i]);
+        }
+        return images;
+    }
+
     function mint() public {
         require(
-            _userCounts[_msgSender()] == MAX_MINT,
+            _userIds[_msgSender()].length < MAX_MINT,
             "TestGasslessNFT: Max amount exceed"
         );
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        _userCounts[_msgSender()]++;
+        _userIds[_msgSender()].push(tokenId);
+        _userIdIndex[tokenId] = uint8(_userIds[_msgSender()].length - 1);
         _safeMint(_msgSender(), tokenId);
+    }
+
+    function burn(uint256 tokenId) public override {
+        address owner = ERC721.ownerOf(tokenId);
+
+        uint256[] storage userIds = _userIds[owner];
+        uint8 index = _userIdIndex[tokenId];
+
+        require(index < userIds.length, "TestGasslessNFT: Index exceed");
+
+        for (uint8 i = index; i < userIds.length - 1; i++) {
+            userIds[i] = userIds[i + 1];
+        }
+        userIds.pop();
+
+        super.burn(tokenId);
     }
 
     function tokenURI(uint256 tokenId)
@@ -42,22 +74,12 @@ contract TestGasslessNFT is ERC721Burnable, Ownable {
         return
             bytes(baseURI).length > 0
                 ? string(
-                    abi.encodePacked(baseURI, tokenId.toString(), "400/500")
+                    abi.encodePacked(baseURI, tokenId.toString(), "/400/500")
                 )
                 : "";
     }
 
     function _baseURI() internal view virtual override returns (string memory) {
         return "https://picsum.photos/seed/";
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal virtual override {
-        require(to == address(0), "Err: token transfer is BLOCKED");
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 }
