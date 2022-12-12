@@ -74,7 +74,16 @@ contract TestGasslessNFT is ERC721Burnable, Ownable {
         return
             bytes(baseURI).length > 0
                 ? string(
-                    abi.encodePacked(baseURI, tokenId.toString(), "/400/500")
+                    abi.encodePacked(
+                        baseURI,
+                        Strings.toHexString(
+                            uint256(
+                                keccak256(abi.encodePacked(tokenId.toString()))
+                            ),
+                            32
+                        ),
+                        "/400/500"
+                    )
                 )
                 : "";
     }
