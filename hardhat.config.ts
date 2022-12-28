@@ -14,6 +14,12 @@ const config: HardhatUserConfig = {
       accounts: getAccounts("gw_testnet"),
       loggingEnabled: true,
     },
+    gw_alphanet: {
+      chainId: 202206,
+      url: getNodeUrl("gw_alphanet"),
+      accounts: getAccounts("gw_alphanet"),
+      loggingEnabled: true,
+    },
   },
   namedAccounts: {
     deployer: 0,
