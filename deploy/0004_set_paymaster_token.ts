@@ -26,6 +26,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return;
   }
 
+  // await paymasterToken.mint('0x0D43536d52289a0249222Ab48eE7CE9A5A35361b', hre.ethers.utils.parseEther('100000'))
+
   const currentTokenAddress = (await gaslessPaymaster.callStatic.paymentToken()).token;
   if (currentTokenAddress === paymasterToken.address) {
     console.log(
