@@ -48,13 +48,14 @@ contract PaymasterToken is IERC20Permit, ERC20, IPaymasterToken, Ownable {
 
     /** @notice Creates `_amnt` tokens and assigns them to `_to`, increasing
      * the total supply.
+     * as this token is test, anybody could mint for a demo purposes
      * @dev Emits a {Transfer} event with `from` set to the zero address.
      * Requirements:
      * - `to` cannot be the zero address.
      * @param _to The destination address
      * @param _amnt The amount of tokens to be minted
      */
-    function mint(address _to, uint256 _amnt) external override onlyOwner {
+    function mint(address _to, uint256 _amnt) external override {
         _mint(_to, _amnt);
     }
 
